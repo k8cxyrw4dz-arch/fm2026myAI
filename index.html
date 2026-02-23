@@ -3,442 +3,386 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FM 2026 스카우트 허브</title>
+  <title>프리미어리그 선수 검색</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=SUIT:wght@300;400;500;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg: #f7f4ec;
-      --paper: #fffdfa;
-      --ink: #1e2a2f;
-      --muted: #5f6f75;
-      --line: #d9d2c2;
-      --accent: #0d7a65;
-      --accent-soft: #d9f3ed;
-      --warm: #ff8f3f;
-      --warm-soft: #ffe8d7;
-      --danger: #cb3d3d;
+      --bg: #f2f5ee;
+      --ink: #11201a;
+      --muted: #53645b;
+      --card: #fbfdf7;
+      --line: #d5dfcf;
+      --brand: #0f5b3f;
+      --brand-soft: #dff2e6;
+      --accent: #d89f2b;
       --radius: 18px;
-      --shadow: 0 12px 26px rgba(22, 38, 44, 0.08);
+      --shadow: 0 14px 28px rgba(16, 31, 22, 0.1);
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
-      font-family: "SUIT", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
       color: var(--ink);
+      font-family: "Noto Sans KR", sans-serif;
       background:
-        radial-gradient(circle at 90% 10%, #d8efe8 0%, transparent 38%),
-        radial-gradient(circle at 10% 80%, #ffe4cf 0%, transparent 34%),
+        radial-gradient(circle at 15% 10%, #e5f5eb 0%, transparent 34%),
+        radial-gradient(circle at 90% 100%, #f8eccf 0%, transparent 28%),
         var(--bg);
       min-height: 100vh;
-      line-height: 1.45;
     }
 
     .wrap {
-      max-width: 1200px;
+      max-width: 1180px;
       margin: 0 auto;
-      padding: 28px 18px 56px;
+      padding: 24px 16px 52px;
     }
 
     .hero {
-      position: relative;
-      overflow: hidden;
-      border-radius: calc(var(--radius) + 6px);
-      padding: 28px;
-      background: linear-gradient(120deg, #17343a 0%, #24565f 48%, #0f7c67 100%);
-      color: #f6fffd;
+      background: linear-gradient(120deg, #0d3e2d 0%, #176347 58%, #1f7b57 100%);
+      border-radius: 24px;
+      padding: 24px;
+      color: #f4fff8;
       box-shadow: var(--shadow);
-      animation: rise 0.7s ease;
     }
 
-    .hero::after {
-      content: "";
-      position: absolute;
-      right: -80px;
-      top: -80px;
-      width: 240px;
-      height: 240px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.1);
-      pointer-events: none;
-    }
-
-    .title {
+    h1 {
       margin: 0;
-      font-family: "Black Han Sans", sans-serif;
-      letter-spacing: 0.4px;
-      font-weight: 400;
-      font-size: clamp(2rem, 4.5vw, 3rem);
+      font-family: "Space Grotesk", sans-serif;
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      letter-spacing: 0.02em;
     }
 
-    .subtitle {
-      margin: 10px 0 0;
-      color: #d6f3ee;
-      max-width: 62ch;
-      font-size: 0.98rem;
+    .sub {
+      margin-top: 8px;
+      color: #d9f4e3;
+      font-size: 0.96rem;
+    }
+
+    .stats {
+      margin-top: 12px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .chip {
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      background: rgba(255, 255, 255, 0.11);
+      border-radius: 999px;
+      padding: 6px 11px;
+      font-size: 0.83rem;
+      font-weight: 600;
     }
 
     .panel {
-      margin-top: 18px;
+      margin-top: 14px;
       display: grid;
-      grid-template-columns: repeat(4, minmax(150px, 1fr));
-      gap: 12px;
-      animation: rise 0.85s ease;
+      grid-template-columns: 1.2fr 1fr 1fr;
+      gap: 10px;
     }
 
-    .control {
-      background: var(--paper);
+    .field {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 11px;
+      box-shadow: var(--shadow);
+    }
+
+    .field label {
+      display: block;
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-bottom: 7px;
+      font-weight: 700;
+    }
+
+    .field input,
+    .field select {
+      width: 100%;
+      border: 1px solid #becdbc;
+      border-radius: 11px;
+      padding: 10px;
+      font-size: 0.94rem;
+      background: #fff;
+      color: var(--ink);
+    }
+
+    .field input:focus,
+    .field select:focus {
+      outline: 2px solid var(--accent);
+      border-color: transparent;
+    }
+
+    .status {
+      margin-top: 10px;
+      font-size: 0.86rem;
+      color: var(--muted);
+    }
+
+    .grid {
+      margin-top: 16px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(255px, 1fr));
+      gap: 12px;
+    }
+
+    .card {
+      background: var(--card);
       border: 1px solid var(--line);
       border-radius: var(--radius);
       padding: 12px;
       box-shadow: var(--shadow);
     }
 
-    .control label {
-      display: block;
-      font-size: 0.82rem;
-      font-weight: 700;
-      color: var(--muted);
-      margin-bottom: 8px;
-    }
-
-    .control input,
-    .control select {
-      width: 100%;
-      border-radius: 12px;
-      border: 1px solid #c9cfcb;
-      padding: 10px 11px;
-      font-size: 0.95rem;
-      background: #ffffff;
-      color: var(--ink);
-    }
-
-    .control input:focus,
-    .control select:focus {
-      outline: 2px solid var(--accent);
-      outline-offset: 1px;
-      border-color: transparent;
-    }
-
-    .grid {
-      margin-top: 16px;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
-      gap: 14px;
-    }
-
-    .card {
-      background: var(--paper);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      padding: 14px;
-      box-shadow: var(--shadow);
-      animation: rise 0.55s ease backwards;
-    }
-
-    .card:nth-child(2n) { animation-delay: 0.05s; }
-    .card:nth-child(3n) { animation-delay: 0.1s; }
-
     .top {
       display: flex;
-      justify-content: space-between;
+      align-items: center;
       gap: 10px;
-      align-items: flex-start;
+    }
+
+    .avatar {
+      width: 62px;
+      height: 62px;
+      border-radius: 14px;
+      background: linear-gradient(145deg, #eef5e7 0%, #dbe9d4 100%);
+      border: 1px solid #cfe0ca;
+      object-fit: cover;
+      flex: 0 0 auto;
     }
 
     .name {
       margin: 0;
-      font-size: 1.15rem;
-      font-weight: 800;
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 1.04rem;
+      line-height: 1.2;
     }
 
     .meta {
       margin-top: 3px;
+      font-size: 0.84rem;
       color: var(--muted);
+    }
+
+    .row {
+      margin-top: 10px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      font-size: 0.86rem;
+    }
+
+    .box {
+      border: 1px solid #dbe6d7;
+      background: #f7fbf2;
+      border-radius: 10px;
+      padding: 8px;
+    }
+
+    .key {
+      display: block;
+      color: #607368;
+      font-size: 0.73rem;
+      margin-bottom: 2px;
+      font-weight: 700;
+    }
+
+    .val {
+      font-weight: 700;
       font-size: 0.88rem;
     }
 
-    .tag {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 44px;
-      border-radius: 999px;
-      padding: 5px 9px;
-      font-size: 0.8rem;
-      font-weight: 700;
-      border: 1px solid #bdd5ce;
-      background: var(--accent-soft);
-      color: #0f5e4d;
-    }
-
-    .stat {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 8px;
-      margin-top: 11px;
-    }
-
-    .stat div {
-      background: #f9f7f1;
-      border: 1px solid #e6dece;
-      border-radius: 10px;
-      padding: 7px 8px;
-    }
-
-    .k {
-      display: block;
-      font-size: 0.73rem;
-      font-weight: 700;
-      color: #61716d;
-      margin-bottom: 2px;
-    }
-
-    .v {
-      font-size: 0.96rem;
-      font-weight: 800;
-    }
-
-    .score {
-      margin-top: 10px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .bar {
-      height: 9px;
-      flex: 1;
-      border-radius: 99px;
-      overflow: hidden;
-      background: #e5e4df;
-    }
-
-    .bar > b {
-      display: block;
-      height: 100%;
-      border-radius: inherit;
-      background: linear-gradient(90deg, var(--warm), #f66f3d);
-    }
-
-    .hint {
-      margin-top: 12px;
-      font-size: 0.84rem;
-      background: var(--warm-soft);
-      border: 1px solid #f6d4bb;
-      color: #864013;
-      padding: 8px 10px;
-      border-radius: 10px;
-    }
-
     .empty {
-      grid-column: 1 / -1;
-      border: 1px dashed #c3bcae;
-      border-radius: var(--radius);
-      background: #fffcf6;
-      padding: 28px 16px;
+      margin-top: 14px;
+      border: 1px dashed #c3d2bf;
+      border-radius: 16px;
+      padding: 26px;
       text-align: center;
-      color: #6f746f;
-      font-weight: 600;
+      color: var(--muted);
+      background: #f8fcf5;
     }
 
-    .foot {
-      margin-top: 16px;
-      color: #5e686d;
-      font-size: 0.85rem;
-    }
-
-    @media (max-width: 880px) {
-      .panel {
-        grid-template-columns: repeat(2, minmax(150px, 1fr));
-      }
-
-      .hero {
-        padding: 22px;
-      }
-    }
-
-    @media (max-width: 560px) {
-      .panel {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    @keyframes rise {
-      from {
-        opacity: 0;
-        transform: translateY(10px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+    @media (max-width: 900px) {
+      .panel { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
-  <main class="wrap">
+  <div class="wrap">
     <section class="hero">
-      <h1 class="title">FM 2026 스카우트 허브</h1>
-      <p class="subtitle">
-        포지션, 예산, 나이를 기준으로 바로 전력감과 유망주를 빠르게 찾는 추천 페이지입니다.
-        추천 점수는 잠재력, 나이, 가격 효율을 합산해 계산합니다.
-      </p>
-    </section>
-
-    <section class="panel" aria-label="필터 영역">
-      <div class="control">
-        <label for="search">선수 검색</label>
-        <input id="search" type="text" placeholder="이름 또는 팀 입력" />
-      </div>
-      <div class="control">
-        <label for="position">포지션</label>
-        <select id="position">
-          <option value="ALL">전체</option>
-          <option value="GK">GK</option>
-          <option value="CB">CB</option>
-          <option value="FB">FB/WB</option>
-          <option value="DM">DM/CM</option>
-          <option value="AM">AM/W</option>
-          <option value="ST">ST</option>
-        </select>
-      </div>
-      <div class="control">
-        <label for="budget">이적 예산 (최대)</label>
-        <select id="budget">
-          <option value="999">제한 없음</option>
-          <option value="15">15M 이하</option>
-          <option value="30">30M 이하</option>
-          <option value="50">50M 이하</option>
-          <option value="80">80M 이하</option>
-        </select>
-      </div>
-      <div class="control">
-        <label for="age">최대 나이</label>
-        <select id="age">
-          <option value="40">제한 없음</option>
-          <option value="19">19세 이하</option>
-          <option value="21">21세 이하</option>
-          <option value="24">24세 이하</option>
-          <option value="27">27세 이하</option>
-        </select>
+      <h1>Premier League Player Finder</h1>
+      <p class="sub">현재 시각 기준 데이터는 페이지 로드 시 API 응답값을 사용합니다.</p>
+      <div class="stats">
+        <span class="chip" id="count-chip">선수 0명</span>
+        <span class="chip" id="team-chip">팀 0개</span>
+        <span class="chip" id="time-chip">업데이트 준비중</span>
       </div>
     </section>
 
-    <section id="cards" class="grid" aria-live="polite"></section>
+    <section class="panel">
+      <div class="field">
+        <label for="q">검색</label>
+        <input id="q" type="text" placeholder="선수명, 팀명, 국적으로 검색" />
+      </div>
+      <div class="field">
+        <label for="club">클럽</label>
+        <select id="club"><option value="">전체 클럽</option></select>
+      </div>
+      <div class="field">
+        <label for="pos">포지션</label>
+        <select id="pos"><option value="">전체 포지션</option></select>
+      </div>
+    </section>
 
-    <p class="foot">
-      참고: FM 2026 정식 DB가 공개되기 전까지는 일반적으로 알려진 성장 추세를 기준으로 한 예시형 추천입니다.
-    </p>
-  </main>
+    <div class="status" id="status">데이터를 불러오는 중입니다...</div>
+    <main id="result" class="grid"></main>
+  </div>
 
   <script>
-    const players = [
-      { name: "Guillaume Restes", team: "Toulouse", age: 21, nation: "France", pos: "GK", fee: 14, wage: 39, ca: 135, pa: 160, note: "빌드업 안정감 + 반사신경" },
-      { name: "Giorgi Mamardashvili", team: "Valencia", age: 25, nation: "Georgia", pos: "GK", fee: 40, wage: 95, ca: 153, pa: 166, note: "즉시 전력 주전 골키퍼" },
-      { name: "António Silva", team: "Benfica", age: 22, nation: "Portugal", pos: "CB", fee: 62, wage: 130, ca: 154, pa: 176, note: "수비 지능과 전진 패스" },
-      { name: "Leny Yoro", team: "Man Utd", age: 20, nation: "France", pos: "CB", fee: 70, wage: 120, ca: 151, pa: 178, note: "하이 라인 대응 속도" },
-      { name: "Jorrel Hato", team: "Ajax", age: 20, nation: "Netherlands", pos: "FB", fee: 38, wage: 70, ca: 146, pa: 171, note: "LB/CB 멀티 + 성장폭" },
-      { name: "Milos Kerkez", team: "Bournemouth", age: 22, nation: "Hungary", pos: "FB", fee: 34, wage: 76, ca: 145, pa: 166, note: "왕복 속도 + 크로스" },
-      { name: "Archie Gray", team: "Tottenham", age: 20, nation: "England", pos: "DM", fee: 45, wage: 88, ca: 146, pa: 172, note: "CM/DM/RB 전천후" },
-      { name: "Warren Zaire-Emery", team: "PSG", age: 20, nation: "France", pos: "DM", fee: 85, wage: 170, ca: 157, pa: 179, note: "월드클래스 박스투박스" },
-      { name: "Arthur Vermeeren", team: "Atletico", age: 21, nation: "Belgium", pos: "DM", fee: 36, wage: 78, ca: 143, pa: 168, note: "템포 조절형 레지스타" },
-      { name: "Arda Guler", team: "Real Madrid", age: 21, nation: "Turkiye", pos: "AM", fee: 58, wage: 135, ca: 150, pa: 177, note: "좌발 찬스메이커" },
-      { name: "Rayan Cherki", team: "Lyon", age: 22, nation: "France", pos: "AM", fee: 42, wage: 98, ca: 147, pa: 171, note: "1:1 돌파와 킬패스" },
-      { name: "Desire Doue", team: "PSG", age: 21, nation: "France", pos: "AM", fee: 68, wage: 128, ca: 151, pa: 176, note: "양쪽 윙/AMC 멀티" },
-      { name: "Estevao", team: "Palmeiras", age: 19, nation: "Brazil", pos: "AM", fee: 30, wage: 45, ca: 136, pa: 174, note: "고성장 저비용 유망주" },
-      { name: "Lamine Yamal", team: "Barcelona", age: 19, nation: "Spain", pos: "AM", fee: 95, wage: 180, ca: 160, pa: 186, note: "즉시 에이스급 파괴력" },
-      { name: "Benjamin Sesko", team: "Leipzig", age: 23, nation: "Slovenia", pos: "ST", fee: 55, wage: 120, ca: 152, pa: 173, note: "피지컬 + 침투 완성형" },
-      { name: "Endrick", team: "Real Madrid", age: 20, nation: "Brazil", pos: "ST", fee: 80, wage: 165, ca: 154, pa: 181, note: "미래형 월드클래스 9번" },
-      { name: "Samu Omorodion", team: "Atletico", age: 22, nation: "Spain", pos: "ST", fee: 34, wage: 74, ca: 144, pa: 168, note: "압박형 타깃 스트라이커" },
-      { name: "Youssoufa Moukoko", team: "Dortmund", age: 21, nation: "Germany", pos: "ST", fee: 28, wage: 64, ca: 141, pa: 166, note: "저예산 골결 유망주" },
-      { name: "Kenan Yildiz", team: "Juventus", age: 21, nation: "Turkiye", pos: "AM", fee: 44, wage: 93, ca: 146, pa: 171, note: "세컨톱 운영까지 가능" },
-      { name: "Luca Netz", team: "Monchengladbach", age: 23, nation: "Germany", pos: "FB", fee: 20, wage: 52, ca: 139, pa: 160, note: "좌측 풀백 가성비 픽" }
-    ];
+    const BASE = "https://www.thesportsdb.com/api/v1/json/123";
+    const LEAGUE = "English_Premier_League";
 
-    const $search = document.getElementById("search");
-    const $position = document.getElementById("position");
-    const $budget = document.getElementById("budget");
-    const $age = document.getElementById("age");
-    const $cards = document.getElementById("cards");
+    const state = {
+      players: [],
+      filtered: [],
+      teams: [],
+      loadedAt: null
+    };
 
-    function calcScore(p) {
-      const potentialScore = (p.pa - 130) * 0.9;
-      const ageBonus = Math.max(0, (25 - p.age) * 2.1);
-      const valueScore = Math.max(0, 50 - p.fee) * 0.8;
-      return Math.min(100, Math.round(potentialScore + ageBonus + valueScore));
+    const qEl = document.getElementById("q");
+    const clubEl = document.getElementById("club");
+    const posEl = document.getElementById("pos");
+    const statusEl = document.getElementById("status");
+    const resultEl = document.getElementById("result");
+    const countChip = document.getElementById("count-chip");
+    const teamChip = document.getElementById("team-chip");
+    const timeChip = document.getElementById("time-chip");
+
+    async function fetchJson(url) {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`API 실패: ${res.status}`);
+      return res.json();
     }
 
-    function money(million) {
-      return `€${million}M`;
+    function normalizePlayer(raw, teamName) {
+      return {
+        id: raw.idPlayer || `${raw.strPlayer}-${teamName}`,
+        name: raw.strPlayer || "이름 없음",
+        position: raw.strPosition || "정보 없음",
+        nationality: raw.strNationality || "정보 없음",
+        birth: raw.dateBorn || "정보 없음",
+        team: teamName,
+        avatar: raw.strCutout || raw.strThumb || "",
+        wage: raw.strWage || "정보 없음",
+        value: raw.strValue || "정보 없음"
+      };
+    }
+
+    async function loadPlayers() {
+      statusEl.textContent = "프리미어리그 팀 목록을 가져오는 중...";
+      const teamRes = await fetchJson(`${BASE}/search_all_teams.php?l=${LEAGUE}`);
+      const teams = (teamRes.teams || [])
+        .filter((t) => t.strSport === "Soccer")
+        .map((t) => ({ id: t.idTeam, name: t.strTeam }))
+        .sort((a, b) => a.name.localeCompare(b.name));
+
+      state.teams = teams;
+      teamChip.textContent = `팀 ${teams.length}개`;
+
+      const all = [];
+      const chunkSize = 4;
+
+      for (let i = 0; i < teams.length; i += chunkSize) {
+        const chunk = teams.slice(i, i + chunkSize);
+        statusEl.textContent = `선수 데이터 수집 중... (${Math.min(i + chunk.length, teams.length)}/${teams.length}팀)`;
+
+        const settled = await Promise.allSettled(
+          chunk.map(async (team) => {
+            const res = await fetchJson(`${BASE}/lookup_all_players.php?id=${team.id}`);
+            const rows = res.player || [];
+            return rows.map((raw) => normalizePlayer(raw, team.name));
+          })
+        );
+
+        settled.forEach((r) => {
+          if (r.status === "fulfilled") all.push(...r.value);
+        });
+      }
+
+      const dedup = new Map();
+      all.forEach((p) => dedup.set(p.id, p));
+      state.players = Array.from(dedup.values()).sort((a, b) => a.name.localeCompare(b.name));
+      state.loadedAt = new Date();
+      populateFilters();
+      applyFilters();
+    }
+
+    function populateFilters() {
+      const teamNames = [...new Set(state.players.map((p) => p.team))].sort((a, b) => a.localeCompare(b));
+      const positions = [...new Set(state.players.map((p) => p.position))].sort((a, b) => a.localeCompare(b));
+
+      clubEl.innerHTML = '<option value="">전체 클럽</option>' +
+        teamNames.map((n) => `<option value="${n}">${n}</option>`).join("");
+
+      posEl.innerHTML = '<option value="">전체 포지션</option>' +
+        positions.map((p) => `<option value="${p}">${p}</option>`).join("");
+    }
+
+    function applyFilters() {
+      const q = qEl.value.trim().toLowerCase();
+      const club = clubEl.value;
+      const pos = posEl.value;
+
+      state.filtered = state.players.filter((p) => {
+        const passQ = !q || [p.name, p.team, p.nationality].join(" ").toLowerCase().includes(q);
+        const passClub = !club || p.team === club;
+        const passPos = !pos || p.position === pos;
+        return passQ && passClub && passPos;
+      });
+
+      countChip.textContent = `선수 ${state.filtered.length}명`;
+      timeChip.textContent = state.loadedAt
+        ? `업데이트 ${state.loadedAt.toLocaleString("ko-KR")}`
+        : "업데이트 준비중";
+
+      statusEl.textContent = `현재 시점 EPL 선수 데이터 ${state.players.length}명 중 ${state.filtered.length}명 표시`;
+      render();
     }
 
     function render() {
-      const query = $search.value.trim().toLowerCase();
-      const pos = $position.value;
-      const budget = Number($budget.value);
-      const age = Number($age.value);
-
-      const filtered = players
-        .filter((p) => (pos === "ALL" ? true : p.pos === pos))
-        .filter((p) => p.fee <= budget && p.age <= age)
-        .filter((p) => {
-          if (!query) return true;
-          return (`${p.name} ${p.team} ${p.nation}`.toLowerCase().includes(query));
-        })
-        .map((p) => ({ ...p, score: calcScore(p) }))
-        .sort((a, b) => b.score - a.score || a.fee - b.fee);
-
-      if (!filtered.length) {
-        $cards.innerHTML = '<div class="empty">조건에 맞는 선수가 없습니다. 포지션이나 예산을 완화해보세요.</div>';
+      if (!state.filtered.length) {
+        resultEl.innerHTML = '<div class="empty">조건에 맞는 선수가 없습니다.</div>';
         return;
       }
 
-      $cards.innerHTML = filtered.map((p) => {
-        const width = `${p.score}%`;
-        return `
-          <article class="card" aria-label="${p.name} 추천 카드">
-            <div class="top">
-              <div>
-                <h2 class="name">${p.name}</h2>
-                <div class="meta">${p.team} · ${p.nation} · ${p.age}세</div>
-              </div>
-              <span class="tag">${p.pos}</span>
+      resultEl.innerHTML = state.filtered.map((p) => `
+        <article class="card">
+          <div class="top">
+            <img class="avatar" src="${p.avatar || ""}" alt="${p.name}" onerror="this.style.display='none'" />
+            <div>
+              <h3 class="name">${p.name}</h3>
+              <div class="meta">${p.team}</div>
             </div>
-
-            <div class="stat">
-              <div><span class="k">예상 이적료</span><span class="v">${money(p.fee)}</span></div>
-              <div><span class="k">주급</span><span class="v">€${p.wage}K</span></div>
-              <div><span class="k">현재 능력 (CA)</span><span class="v">${p.ca}</span></div>
-              <div><span class="k">잠재 능력 (PA)</span><span class="v">${p.pa}</span></div>
-            </div>
-
-            <div class="score">
-              <strong>추천 점수 ${p.score}</strong>
-              <span class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${p.score}">
-                <b style="width:${width}"></b>
-              </span>
-            </div>
-
-            <div class="hint">스카우트 코멘트: ${p.note}</div>
-          </article>
-        `;
-      }).join("");
+          </div>
+          <div class="row">
+            <div class="box"><span class="key">포지션</span><span class="val">${p.position}</span></div>
+            <div class="box"><span class="key">국적</span><span class="val">${p.nationality}</span></div>
+            <div class="box"><span class="key">생년월일</span><span class="val">${p.birth}</span></div>
+            <div class="box"><span class="key">추정 가치/연봉</span><span class="val">${p.value} / ${p.wage}</span></div>
+          </div>
+        </article>
+      `).join("");
     }
 
-    [$search, $position, $budget, $age].forEach((el) => {
-      el.addEventListener("input", render);
-      el.addEventListener("change", render);
-    });
+    [qEl, clubEl, posEl].forEach((el) => el.addEventListener("input", applyFilters));
 
-    render();
+    loadPlayers().catch((err) => {
+      statusEl.textContent = "데이터를 불러오지 못했습니다. 잠시 후 새로고침해 주세요.";
+      resultEl.innerHTML = `<div class="empty">오류: ${err.message}</div>`;
+    });
   </script>
 </body>
 </html>
-
-<!-- auto-push-check: 2026-02-24 01:00 -->
