@@ -1,0 +1,442 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FM 2026 스카우트 허브</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=SUIT:wght@300;400;500;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #f7f4ec;
+      --paper: #fffdfa;
+      --ink: #1e2a2f;
+      --muted: #5f6f75;
+      --line: #d9d2c2;
+      --accent: #0d7a65;
+      --accent-soft: #d9f3ed;
+      --warm: #ff8f3f;
+      --warm-soft: #ffe8d7;
+      --danger: #cb3d3d;
+      --radius: 18px;
+      --shadow: 0 12px 26px rgba(22, 38, 44, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "SUIT", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 90% 10%, #d8efe8 0%, transparent 38%),
+        radial-gradient(circle at 10% 80%, #ffe4cf 0%, transparent 34%),
+        var(--bg);
+      min-height: 100vh;
+      line-height: 1.45;
+    }
+
+    .wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 28px 18px 56px;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      border-radius: calc(var(--radius) + 6px);
+      padding: 28px;
+      background: linear-gradient(120deg, #17343a 0%, #24565f 48%, #0f7c67 100%);
+      color: #f6fffd;
+      box-shadow: var(--shadow);
+      animation: rise 0.7s ease;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      right: -80px;
+      top: -80px;
+      width: 240px;
+      height: 240px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      pointer-events: none;
+    }
+
+    .title {
+      margin: 0;
+      font-family: "Black Han Sans", sans-serif;
+      letter-spacing: 0.4px;
+      font-weight: 400;
+      font-size: clamp(2rem, 4.5vw, 3rem);
+    }
+
+    .subtitle {
+      margin: 10px 0 0;
+      color: #d6f3ee;
+      max-width: 62ch;
+      font-size: 0.98rem;
+    }
+
+    .panel {
+      margin-top: 18px;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(150px, 1fr));
+      gap: 12px;
+      animation: rise 0.85s ease;
+    }
+
+    .control {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 12px;
+      box-shadow: var(--shadow);
+    }
+
+    .control label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .control input,
+    .control select {
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid #c9cfcb;
+      padding: 10px 11px;
+      font-size: 0.95rem;
+      background: #ffffff;
+      color: var(--ink);
+    }
+
+    .control input:focus,
+    .control select:focus {
+      outline: 2px solid var(--accent);
+      outline-offset: 1px;
+      border-color: transparent;
+    }
+
+    .grid {
+      margin-top: 16px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+      gap: 14px;
+    }
+
+    .card {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 14px;
+      box-shadow: var(--shadow);
+      animation: rise 0.55s ease backwards;
+    }
+
+    .card:nth-child(2n) { animation-delay: 0.05s; }
+    .card:nth-child(3n) { animation-delay: 0.1s; }
+
+    .top {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    .name {
+      margin: 0;
+      font-size: 1.15rem;
+      font-weight: 800;
+    }
+
+    .meta {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 44px;
+      border-radius: 999px;
+      padding: 5px 9px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      border: 1px solid #bdd5ce;
+      background: var(--accent-soft);
+      color: #0f5e4d;
+    }
+
+    .stat {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 11px;
+    }
+
+    .stat div {
+      background: #f9f7f1;
+      border: 1px solid #e6dece;
+      border-radius: 10px;
+      padding: 7px 8px;
+    }
+
+    .k {
+      display: block;
+      font-size: 0.73rem;
+      font-weight: 700;
+      color: #61716d;
+      margin-bottom: 2px;
+    }
+
+    .v {
+      font-size: 0.96rem;
+      font-weight: 800;
+    }
+
+    .score {
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .bar {
+      height: 9px;
+      flex: 1;
+      border-radius: 99px;
+      overflow: hidden;
+      background: #e5e4df;
+    }
+
+    .bar > b {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--warm), #f66f3d);
+    }
+
+    .hint {
+      margin-top: 12px;
+      font-size: 0.84rem;
+      background: var(--warm-soft);
+      border: 1px solid #f6d4bb;
+      color: #864013;
+      padding: 8px 10px;
+      border-radius: 10px;
+    }
+
+    .empty {
+      grid-column: 1 / -1;
+      border: 1px dashed #c3bcae;
+      border-radius: var(--radius);
+      background: #fffcf6;
+      padding: 28px 16px;
+      text-align: center;
+      color: #6f746f;
+      font-weight: 600;
+    }
+
+    .foot {
+      margin-top: 16px;
+      color: #5e686d;
+      font-size: 0.85rem;
+    }
+
+    @media (max-width: 880px) {
+      .panel {
+        grid-template-columns: repeat(2, minmax(150px, 1fr));
+      }
+
+      .hero {
+        padding: 22px;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .panel {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @keyframes rise {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="hero">
+      <h1 class="title">FM 2026 스카우트 허브</h1>
+      <p class="subtitle">
+        포지션, 예산, 나이를 기준으로 바로 전력감과 유망주를 빠르게 찾는 추천 페이지입니다.
+        추천 점수는 잠재력, 나이, 가격 효율을 합산해 계산합니다.
+      </p>
+    </section>
+
+    <section class="panel" aria-label="필터 영역">
+      <div class="control">
+        <label for="search">선수 검색</label>
+        <input id="search" type="text" placeholder="이름 또는 팀 입력" />
+      </div>
+      <div class="control">
+        <label for="position">포지션</label>
+        <select id="position">
+          <option value="ALL">전체</option>
+          <option value="GK">GK</option>
+          <option value="CB">CB</option>
+          <option value="FB">FB/WB</option>
+          <option value="DM">DM/CM</option>
+          <option value="AM">AM/W</option>
+          <option value="ST">ST</option>
+        </select>
+      </div>
+      <div class="control">
+        <label for="budget">이적 예산 (최대)</label>
+        <select id="budget">
+          <option value="999">제한 없음</option>
+          <option value="15">15M 이하</option>
+          <option value="30">30M 이하</option>
+          <option value="50">50M 이하</option>
+          <option value="80">80M 이하</option>
+        </select>
+      </div>
+      <div class="control">
+        <label for="age">최대 나이</label>
+        <select id="age">
+          <option value="40">제한 없음</option>
+          <option value="19">19세 이하</option>
+          <option value="21">21세 이하</option>
+          <option value="24">24세 이하</option>
+          <option value="27">27세 이하</option>
+        </select>
+      </div>
+    </section>
+
+    <section id="cards" class="grid" aria-live="polite"></section>
+
+    <p class="foot">
+      참고: FM 2026 정식 DB가 공개되기 전까지는 일반적으로 알려진 성장 추세를 기준으로 한 예시형 추천입니다.
+    </p>
+  </main>
+
+  <script>
+    const players = [
+      { name: "Guillaume Restes", team: "Toulouse", age: 21, nation: "France", pos: "GK", fee: 14, wage: 39, ca: 135, pa: 160, note: "빌드업 안정감 + 반사신경" },
+      { name: "Giorgi Mamardashvili", team: "Valencia", age: 25, nation: "Georgia", pos: "GK", fee: 40, wage: 95, ca: 153, pa: 166, note: "즉시 전력 주전 골키퍼" },
+      { name: "António Silva", team: "Benfica", age: 22, nation: "Portugal", pos: "CB", fee: 62, wage: 130, ca: 154, pa: 176, note: "수비 지능과 전진 패스" },
+      { name: "Leny Yoro", team: "Man Utd", age: 20, nation: "France", pos: "CB", fee: 70, wage: 120, ca: 151, pa: 178, note: "하이 라인 대응 속도" },
+      { name: "Jorrel Hato", team: "Ajax", age: 20, nation: "Netherlands", pos: "FB", fee: 38, wage: 70, ca: 146, pa: 171, note: "LB/CB 멀티 + 성장폭" },
+      { name: "Milos Kerkez", team: "Bournemouth", age: 22, nation: "Hungary", pos: "FB", fee: 34, wage: 76, ca: 145, pa: 166, note: "왕복 속도 + 크로스" },
+      { name: "Archie Gray", team: "Tottenham", age: 20, nation: "England", pos: "DM", fee: 45, wage: 88, ca: 146, pa: 172, note: "CM/DM/RB 전천후" },
+      { name: "Warren Zaire-Emery", team: "PSG", age: 20, nation: "France", pos: "DM", fee: 85, wage: 170, ca: 157, pa: 179, note: "월드클래스 박스투박스" },
+      { name: "Arthur Vermeeren", team: "Atletico", age: 21, nation: "Belgium", pos: "DM", fee: 36, wage: 78, ca: 143, pa: 168, note: "템포 조절형 레지스타" },
+      { name: "Arda Guler", team: "Real Madrid", age: 21, nation: "Turkiye", pos: "AM", fee: 58, wage: 135, ca: 150, pa: 177, note: "좌발 찬스메이커" },
+      { name: "Rayan Cherki", team: "Lyon", age: 22, nation: "France", pos: "AM", fee: 42, wage: 98, ca: 147, pa: 171, note: "1:1 돌파와 킬패스" },
+      { name: "Desire Doue", team: "PSG", age: 21, nation: "France", pos: "AM", fee: 68, wage: 128, ca: 151, pa: 176, note: "양쪽 윙/AMC 멀티" },
+      { name: "Estevao", team: "Palmeiras", age: 19, nation: "Brazil", pos: "AM", fee: 30, wage: 45, ca: 136, pa: 174, note: "고성장 저비용 유망주" },
+      { name: "Lamine Yamal", team: "Barcelona", age: 19, nation: "Spain", pos: "AM", fee: 95, wage: 180, ca: 160, pa: 186, note: "즉시 에이스급 파괴력" },
+      { name: "Benjamin Sesko", team: "Leipzig", age: 23, nation: "Slovenia", pos: "ST", fee: 55, wage: 120, ca: 152, pa: 173, note: "피지컬 + 침투 완성형" },
+      { name: "Endrick", team: "Real Madrid", age: 20, nation: "Brazil", pos: "ST", fee: 80, wage: 165, ca: 154, pa: 181, note: "미래형 월드클래스 9번" },
+      { name: "Samu Omorodion", team: "Atletico", age: 22, nation: "Spain", pos: "ST", fee: 34, wage: 74, ca: 144, pa: 168, note: "압박형 타깃 스트라이커" },
+      { name: "Youssoufa Moukoko", team: "Dortmund", age: 21, nation: "Germany", pos: "ST", fee: 28, wage: 64, ca: 141, pa: 166, note: "저예산 골결 유망주" },
+      { name: "Kenan Yildiz", team: "Juventus", age: 21, nation: "Turkiye", pos: "AM", fee: 44, wage: 93, ca: 146, pa: 171, note: "세컨톱 운영까지 가능" },
+      { name: "Luca Netz", team: "Monchengladbach", age: 23, nation: "Germany", pos: "FB", fee: 20, wage: 52, ca: 139, pa: 160, note: "좌측 풀백 가성비 픽" }
+    ];
+
+    const $search = document.getElementById("search");
+    const $position = document.getElementById("position");
+    const $budget = document.getElementById("budget");
+    const $age = document.getElementById("age");
+    const $cards = document.getElementById("cards");
+
+    function calcScore(p) {
+      const potentialScore = (p.pa - 130) * 0.9;
+      const ageBonus = Math.max(0, (25 - p.age) * 2.1);
+      const valueScore = Math.max(0, 50 - p.fee) * 0.8;
+      return Math.min(100, Math.round(potentialScore + ageBonus + valueScore));
+    }
+
+    function money(million) {
+      return `€${million}M`;
+    }
+
+    function render() {
+      const query = $search.value.trim().toLowerCase();
+      const pos = $position.value;
+      const budget = Number($budget.value);
+      const age = Number($age.value);
+
+      const filtered = players
+        .filter((p) => (pos === "ALL" ? true : p.pos === pos))
+        .filter((p) => p.fee <= budget && p.age <= age)
+        .filter((p) => {
+          if (!query) return true;
+          return (`${p.name} ${p.team} ${p.nation}`.toLowerCase().includes(query));
+        })
+        .map((p) => ({ ...p, score: calcScore(p) }))
+        .sort((a, b) => b.score - a.score || a.fee - b.fee);
+
+      if (!filtered.length) {
+        $cards.innerHTML = '<div class="empty">조건에 맞는 선수가 없습니다. 포지션이나 예산을 완화해보세요.</div>';
+        return;
+      }
+
+      $cards.innerHTML = filtered.map((p) => {
+        const width = `${p.score}%`;
+        return `
+          <article class="card" aria-label="${p.name} 추천 카드">
+            <div class="top">
+              <div>
+                <h2 class="name">${p.name}</h2>
+                <div class="meta">${p.team} · ${p.nation} · ${p.age}세</div>
+              </div>
+              <span class="tag">${p.pos}</span>
+            </div>
+
+            <div class="stat">
+              <div><span class="k">예상 이적료</span><span class="v">${money(p.fee)}</span></div>
+              <div><span class="k">주급</span><span class="v">€${p.wage}K</span></div>
+              <div><span class="k">현재 능력 (CA)</span><span class="v">${p.ca}</span></div>
+              <div><span class="k">잠재 능력 (PA)</span><span class="v">${p.pa}</span></div>
+            </div>
+
+            <div class="score">
+              <strong>추천 점수 ${p.score}</strong>
+              <span class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${p.score}">
+                <b style="width:${width}"></b>
+              </span>
+            </div>
+
+            <div class="hint">스카우트 코멘트: ${p.note}</div>
+          </article>
+        `;
+      }).join("");
+    }
+
+    [$search, $position, $budget, $age].forEach((el) => {
+      el.addEventListener("input", render);
+      el.addEventListener("change", render);
+    });
+
+    render();
+  </script>
+</body>
+</html>
