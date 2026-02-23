@@ -1,6 +1,8 @@
 const API_BASE = "https://www.thesportsdb.com/api/v1/json/123";
 const EPL_LEAGUE = "English_Premier_League";
 const EPL_ID = "4328";
+const CACHE_KEY = "epl_scout_cache_v3";
+const CACHE_TTL_MS = 30 * 60 * 1000;
 
 const appState = {
   teams: [],
@@ -9,7 +11,8 @@ const appState = {
   teamStatsBySeason: new Map(),
   managerProfiles: new Map(),
   loadedAt: null,
-  seasonLabel: currentSeasonLabel()
+  seasonLabel: currentSeasonLabel(),
+  isLoading: true
 };
 
 const managerCareerFallback = {
@@ -49,12 +52,43 @@ function normalizeName(value) {
     .trim();
 }
 
-async function fetchJson(url) {
-  const res = await fetch(url);
-  if (!res.ok) {
-    throw new Error(`API 요청 실패: ${res.status}`);
+async function fetchJson(url, options = {}) {
+  const timeoutMs = options.timeoutMs || 8000;
+  const retries = options.retries ?? 1;
+
+  for (let attempt = 0; attempt <= retries; attempt += 1) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+    try {
+      const res = await fetch(url, { signal: controller.signal });
+      if (!res.ok) throw new Error(`API 요청 실패: ${res.status}`);
+      return await res.json();
+    } catch (err) {
+      if (attempt === retries) throw err;
+    } finally {
+      clearTimeout(timer);
+    }
   }
-  return res.json();
+
+  throw new Error("요청 실패");
+}
+
+async function mapLimit(items, limit, mapper) {
+  const results = new Array(items.length);
+  let cursor = 0;
+
+  async function worker() {
+    while (cursor < items.length) {
+      const index = cursor;
+      cursor += 1;
+      results[index] = await mapper(items[index], index);
+    }
+  }
+
+  const workers = Array.from({ length: Math.min(limit, items.length) }, () => worker());
+  await Promise.all(workers);
+  return results;
 }
 
 function parseGoalDetails(goalDetails, teamId, map) {
@@ -86,32 +120,16 @@ function parseGoalDetails(goalDetails, teamId, map) {
   }
 }
 
-function formationStyle(formation) {
-  if (!formation) return "데이터 없음";
-  if (formation.includes("4-3-3")) return `${formation} (측면 침투/전방 압박)`;
-  if (formation.includes("4-2-3-1")) return `${formation} (10번 활용 + 밸런스)`;
-  if (formation.includes("3-4-2-1") || formation.includes("3-5-2")) return `${formation} (백3 기반 전환)`;
-  return `${formation} (상대/선수 구성 기반 유연 운용)`;
-}
-
-function detectPositionBucket(position) {
-  const p = (position || "").toLowerCase();
-  if (p.includes("goal")) return "gk";
-  if (p.includes("back") || p.includes("defen") || p.includes("centre-back") || p.includes("full-back")) return "df";
-  if (p.includes("mid")) return "mf";
-  return "fw";
-}
-
 async function loadSeasonStats() {
   const byPlayer = new Map();
   const teamFormationAgg = new Map();
 
   let events = [];
   try {
-    const seasonData = await fetchJson(`${API_BASE}/eventsseason.php?id=${EPL_ID}&s=${appState.seasonLabel}`);
+    const seasonData = await fetchJson(`${API_BASE}/eventsseason.php?id=${EPL_ID}&s=${appState.seasonLabel}`, { retries: 0 });
     events = seasonData.events || [];
   } catch {
-    // If season label is not available in source, continue with empty stats.
+    events = [];
   }
 
   for (const ev of events) {
@@ -126,6 +144,7 @@ async function loadSeasonStats() {
       const fm = teamFormationAgg.get(hId);
       fm.set(ev.strHomeFormation, (fm.get(ev.strHomeFormation) || 0) + 1);
     }
+
     if (ev.strAwayFormation) {
       if (!teamFormationAgg.has(aId)) teamFormationAgg.set(aId, new Map());
       const fm = teamFormationAgg.get(aId);
@@ -135,6 +154,14 @@ async function loadSeasonStats() {
 
   appState.teamStatsBySeason = teamFormationAgg;
   return byPlayer;
+}
+
+function formationStyle(formation) {
+  if (!formation) return "데이터 없음";
+  if (formation.includes("4-3-3")) return `${formation} (측면 침투/전방 압박)`;
+  if (formation.includes("4-2-3-1")) return `${formation} (10번 활용 + 밸런스)`;
+  if (formation.includes("3-4-2-1") || formation.includes("3-5-2")) return `${formation} (백3 기반 전환)`;
+  return `${formation} (상대/선수 구성 기반 유연 운용)`;
 }
 
 function mostUsedFormation(teamId) {
@@ -164,17 +191,14 @@ async function ensureManagerProfile(team) {
 
   if (managerName && managerName !== "정보 없음") {
     try {
-      const person = await fetchJson(`${API_BASE}/searchplayers.php?p=${encodeURIComponent(managerName)}`);
+      const person = await fetchJson(`${API_BASE}/searchplayers.php?p=${encodeURIComponent(managerName)}`, { retries: 0 });
       const candidates = person.player || [];
       const best = candidates.find((p) => (p.strTeam || "").toLowerCase() === team.name.toLowerCase()) || candidates[0];
       if (best?.strDescriptionEN) {
-        profile = {
-          ...profile,
-          career: managerCareerFromDescription(best.strDescriptionEN)
-        };
+        profile = { ...profile, career: managerCareerFromDescription(best.strDescriptionEN) };
       }
     } catch {
-      // keep fallback profile
+      // keep fallback
     }
   }
 
@@ -182,15 +206,82 @@ async function ensureManagerProfile(team) {
   return profile;
 }
 
+function detectPositionBucket(position) {
+  const p = (position || "").toLowerCase();
+  if (p.includes("goal")) return "gk";
+  if (p.includes("back") || p.includes("defen") || p.includes("centre-back") || p.includes("full-back")) return "df";
+  if (p.includes("mid")) return "mf";
+  return "fw";
+}
+
 function playerSeasonStat(player) {
   return player.season || { goals: 0, assists: 0 };
 }
 
+function hydrateFromCache() {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    if (!raw) return false;
+
+    const parsed = JSON.parse(raw);
+    if (!parsed?.loadedAt || !Array.isArray(parsed?.teams) || !Array.isArray(parsed?.players)) return false;
+
+    const age = Date.now() - new Date(parsed.loadedAt).getTime();
+    if (age > CACHE_TTL_MS) return false;
+
+    appState.teams = parsed.teams;
+    appState.playersById = new Map();
+    appState.playersByTeam = new Map();
+
+    parsed.players.forEach((p) => {
+      appState.playersById.set(p.id, p);
+      if (!appState.playersByTeam.has(p.teamId)) appState.playersByTeam.set(p.teamId, []);
+      appState.playersByTeam.get(p.teamId).push(p);
+    });
+
+    appState.loadedAt = new Date(parsed.loadedAt);
+    appState.isLoading = false;
+    heroMetaEl.textContent = `캐시 데이터 표시중 (${appState.loadedAt.toLocaleString("ko-KR")}) · 백그라운드 갱신 중`;
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function saveCache() {
+  try {
+    const payload = {
+      loadedAt: appState.loadedAt?.toISOString(),
+      teams: appState.teams,
+      players: [...appState.playersById.values()]
+    };
+    localStorage.setItem(CACHE_KEY, JSON.stringify(payload));
+  } catch {
+    // ignore storage errors
+  }
+}
+
+function playerCard(p) {
+  const s = playerSeasonStat(p);
+  return `
+    <article class="card">
+      <h3>${p.name}</h3>
+      <div class="meta">${p.teamName} · ${p.position || "정보 없음"}</div>
+      <div class="kv">
+        <div class="box"><span class="k">국적</span><span class="v">${p.nationality}</span></div>
+        <div class="box"><span class="k">공격포인트</span><span class="v">${s.goals + s.assists} (${s.goals}+${s.assists})</span></div>
+      </div>
+      <div class="actions">
+        <a class="btn primary" href="#/player/${p.id}">선수 페이지</a>
+        <a class="btn" href="#/team/${p.teamId}">팀 페이지</a>
+      </div>
+    </article>
+  `;
+}
+
 function renderHome() {
   const allPlayers = [...appState.playersById.values()];
-  const teamOptions = appState.teams
-    .map((t) => `<option value="${t.id}">${t.name}</option>`)
-    .join("");
+  const teamOptions = appState.teams.map((t) => `<option value="${t.id}">${t.name}</option>`).join("");
 
   viewEl.innerHTML = `
     <section class="section panel">
@@ -214,9 +305,8 @@ function renderHome() {
           </select>
         </div>
       </div>
-      <p class="note">현재 시즌(${appState.seasonLabel}) 공격포인트는 경기 상세 Goal Details 기반 집계라 일부 누락될 수 있습니다.</p>
+      <p class="note">현재 시즌(${appState.seasonLabel}) 공격포인트는 경기 Goal Details 집계 기반입니다.</p>
     </section>
-
     <section class="section" id="list-wrap"></section>
   `;
 
@@ -253,24 +343,6 @@ function renderHome() {
   apply();
 }
 
-function playerCard(p) {
-  const s = playerSeasonStat(p);
-  return `
-    <article class="card">
-      <h3>${p.name}</h3>
-      <div class="meta">${p.teamName} · ${p.position || "정보 없음"}</div>
-      <div class="kv">
-        <div class="box"><span class="k">국적</span><span class="v">${p.nationality}</span></div>
-        <div class="box"><span class="k">공격포인트</span><span class="v">${s.goals + s.assists} (${s.goals}+${s.assists})</span></div>
-      </div>
-      <div class="actions">
-        <a class="btn primary" href="#/player/${p.id}">선수 페이지</a>
-        <a class="btn" href="#/team/${p.teamId}">팀 페이지</a>
-      </div>
-    </article>
-  `;
-}
-
 function renderTeam(teamId) {
   const team = appState.teams.find((t) => t.id === teamId);
   if (!team) {
@@ -293,7 +365,6 @@ function renderTeam(teamId) {
         <input id="team-player-q" type="text" placeholder="이름, 포지션, 국적" />
       </div>
     </section>
-
     <section class="section" id="team-list"></section>
   `;
 
@@ -324,8 +395,7 @@ function renderPlayer(playerId) {
   }
 
   const stats = playerSeasonStat(p);
-  const bucket = detectPositionBucket(p.position);
-  const keySkills = positionProfile[bucket];
+  const keySkills = positionProfile[detectPositionBucket(p.position)];
 
   viewEl.innerHTML = `
     <section class="section panel">
@@ -335,27 +405,20 @@ function renderPlayer(playerId) {
       </div>
       <h2>${p.name}</h2>
       <p class="meta">${p.teamName} · ${p.position || "정보 없음"} · ${p.nationality}</p>
-
       <div class="split" style="margin-top:10px;">
         <div class="card">
           <h3>현재 시즌 공격포인트</h3>
           <table class="table">
-            <thead>
-              <tr><th>골</th><th>어시스트</th><th>공격포인트</th></tr>
-            </thead>
-            <tbody>
-              <tr><td>${stats.goals}</td><td>${stats.assists}</td><td>${stats.goals + stats.assists}</td></tr>
-            </tbody>
+            <thead><tr><th>골</th><th>어시스트</th><th>공격포인트</th></tr></thead>
+            <tbody><tr><td>${stats.goals}</td><td>${stats.assists}</td><td>${stats.goals + stats.assists}</td></tr></tbody>
           </table>
         </div>
-
         <div class="card">
           <h3>포지션 주요 능력치</h3>
           <div class="tag-row">${keySkills.map((s) => `<span class="tag">${s}</span>`).join("")}</div>
-          <p class="note">능력치는 포지션별 핵심 지표 템플릿입니다. 수치 통계는 API 제공 범위에서 집계됩니다.</p>
+          <p class="note">능력치는 포지션별 핵심 템플릿이며 실제 수치 통계는 API 제공 범위를 따릅니다.</p>
         </div>
       </div>
-
       <div class="card" style="margin-top:12px;">
         <h3>기본 정보</h3>
         <div class="kv">
@@ -387,16 +450,9 @@ async function renderManager(teamId) {
       </div>
       <h2>${profile.managerName}</h2>
       <p class="meta">${profile.teamName} 감독</p>
-
       <div class="split" style="margin-top:10px;">
-        <div class="card">
-          <h3>선호 포지션/전술 성향</h3>
-          <p>${profile.preferredPosition}</p>
-        </div>
-        <div class="card">
-          <h3>감독 경력</h3>
-          <p>${profile.career}</p>
-        </div>
+        <div class="card"><h3>선호 포지션/전술 성향</h3><p>${profile.preferredPosition}</p></div>
+        <div class="card"><h3>감독 경력</h3><p>${profile.career}</p></div>
       </div>
     </section>
   `;
@@ -406,7 +462,6 @@ function parseRoute() {
   const hash = window.location.hash || "#/";
   const parts = hash.replace(/^#\/?/, "").split("/").filter(Boolean);
   if (!parts.length) return { page: "home" };
-
   if (parts[0] === "team" && parts[1]) return { page: "team", id: parts[1] };
   if (parts[0] === "player" && parts[1]) return { page: "player", id: parts[1] };
   if (parts[0] === "manager" && parts[1]) return { page: "manager", id: parts[1] };
@@ -415,16 +470,23 @@ function parseRoute() {
 
 async function router() {
   const route = parseRoute();
+
+  if (appState.isLoading && appState.playersById.size === 0) {
+    viewEl.innerHTML = `<div class="section empty">데이터 로딩 중입니다. 잠시만 기다려주세요...</div>`;
+    return;
+  }
+
   if (route.page === "home") return renderHome();
   if (route.page === "team") return renderTeam(route.id);
   if (route.page === "player") return renderPlayer(route.id);
   if (route.page === "manager") return renderManager(route.id);
 }
 
-async function bootstrap() {
-  heroMetaEl.textContent = "프리미어리그 팀/선수/시즌 통계를 불러오는 중...";
+async function refreshData() {
+  appState.isLoading = true;
+  heroMetaEl.textContent = "최신 데이터 동기화 중...";
 
-  const teamData = await fetchJson(`${API_BASE}/search_all_teams.php?l=${EPL_LEAGUE}`);
+  const teamData = await fetchJson(`${API_BASE}/search_all_teams.php?l=${EPL_LEAGUE}`, { retries: 1 });
   const teams = (teamData.teams || [])
     .filter((t) => t.strSport === "Soccer")
     .map((t) => ({
@@ -435,63 +497,75 @@ async function bootstrap() {
     }))
     .sort((a, b) => a.name.localeCompare(b.name));
 
-  appState.teams = teams;
-
   const seasonStats = await loadSeasonStats();
-
   const playersById = new Map();
   const playersByTeam = new Map();
 
-  const chunk = 4;
-  for (let i = 0; i < teams.length; i += chunk) {
-    const group = teams.slice(i, i + chunk);
-    const settled = await Promise.allSettled(
-      group.map(async (team) => {
-        const data = await fetchJson(`${API_BASE}/lookup_all_players.php?id=${team.id}`);
-        const rows = data.player || [];
-        return rows.map((r) => {
-          const norm = normalizeName(r.strPlayer);
-          const season = seasonStats.get(`${team.id}:${norm}`) || { goals: 0, assists: 0 };
-          return {
-            id: r.idPlayer || `${team.id}:${norm}`,
-            teamId: team.id,
-            teamName: team.name,
-            name: r.strPlayer || "이름 없음",
-            position: r.strPosition || "정보 없음",
-            nationality: r.strNationality || "정보 없음",
-            birth: r.dateBorn || "정보 없음",
-            height: r.strHeight || "정보 없음",
-            weight: r.strWeight || "정보 없음",
-            season
-          };
-        });
-      })
-    );
+  let completed = 0;
+  await mapLimit(teams, 6, async (team) => {
+    try {
+      const data = await fetchJson(`${API_BASE}/lookup_all_players.php?id=${team.id}`, { retries: 0 });
+      const rows = data.player || [];
 
-    for (const entry of settled) {
-      if (entry.status !== "fulfilled") continue;
-      for (const p of entry.value) {
+      rows.forEach((r) => {
+        const norm = normalizeName(r.strPlayer);
+        const season = seasonStats.get(`${team.id}:${norm}`) || { goals: 0, assists: 0 };
+        const p = {
+          id: r.idPlayer || `${team.id}:${norm}`,
+          teamId: team.id,
+          teamName: team.name,
+          name: r.strPlayer || "이름 없음",
+          position: r.strPosition || "정보 없음",
+          nationality: r.strNationality || "정보 없음",
+          birth: r.dateBorn || "정보 없음",
+          height: r.strHeight || "정보 없음",
+          weight: r.strWeight || "정보 없음",
+          season
+        };
+
         playersById.set(p.id, p);
-        if (!playersByTeam.has(p.teamId)) playersByTeam.set(p.teamId, []);
-        playersByTeam.get(p.teamId).push(p);
-      }
+        if (!playersByTeam.has(team.id)) playersByTeam.set(team.id, []);
+        playersByTeam.get(team.id).push(p);
+      });
+    } catch {
+      // Skip failing teams and continue.
+    } finally {
+      completed += 1;
+      heroMetaEl.textContent = `최신 데이터 동기화 중... (${completed}/${teams.length}팀)`;
     }
-  }
+  });
 
+  appState.teams = teams;
   appState.playersById = playersById;
   appState.playersByTeam = playersByTeam;
   appState.loadedAt = new Date();
+  appState.isLoading = false;
+
+  saveCache();
 
   heroMetaEl.textContent = `업데이트: ${appState.loadedAt.toLocaleString("ko-KR")} · 팀 ${teams.length}개 · 선수 ${playersById.size}명 · 시즌 ${appState.seasonLabel}`;
-
   await router();
+}
+
+async function bootstrap() {
+  const hasCache = hydrateFromCache();
+  await router();
+
+  try {
+    await refreshData();
+  } catch (err) {
+    appState.isLoading = false;
+    if (hasCache) {
+      heroMetaEl.textContent = `${heroMetaEl.textContent} · 최신 갱신 실패`;
+      return;
+    }
+    heroMetaEl.textContent = "데이터 로드 실패";
+    viewEl.innerHTML = `<div class="section empty">오류: ${err.message}</div>`;
+  }
 }
 
 window.addEventListener("hashchange", () => {
   router();
 });
 
-bootstrap().catch((err) => {
-  heroMetaEl.textContent = "데이터 로드 실패";
-  viewEl.innerHTML = `<div class="section empty">오류: ${err.message}</div>`;
-});
+bootstrap();
