@@ -1,0 +1,271 @@
+:root {
+  --bg: #eef3e8;
+  --ink: #121d18;
+  --muted: #5c6e64;
+  --panel: #fbfdf8;
+  --line: #d4dfd0;
+  --brand: #0d5a3f;
+  --brand-2: #1d7d58;
+  --amber: #db9f2a;
+  --radius: 18px;
+  --shadow: 0 14px 30px rgba(17, 35, 24, 0.12);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "Noto Sans KR", sans-serif;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at 16% 12%, #dff3e8 0%, transparent 32%),
+    radial-gradient(circle at 85% 92%, #f7e8c8 0%, transparent 30%),
+    var(--bg);
+}
+
+.bg-orb {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(56px);
+  z-index: -1;
+  opacity: 0.4;
+}
+
+.bg-orb-a {
+  width: 230px;
+  height: 230px;
+  right: -60px;
+  top: 20px;
+  background: #8aceab;
+}
+
+.bg-orb-b {
+  width: 220px;
+  height: 220px;
+  left: -70px;
+  bottom: 20px;
+  background: #f0c86e;
+}
+
+.app {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 22px 16px 48px;
+}
+
+.hero {
+  background: linear-gradient(120deg, #0d3d2d 0%, #17624a 62%, #23815f 100%);
+  border-radius: 24px;
+  color: #f5fff9;
+  box-shadow: var(--shadow);
+  padding: 22px;
+}
+
+.logo {
+  display: inline-block;
+  color: #fff;
+  font-family: "Archivo", sans-serif;
+  font-size: clamp(1.45rem, 3vw, 2rem);
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.hero-sub {
+  margin: 8px 0 0;
+  color: #d8f3e6;
+  font-size: 0.95rem;
+}
+
+.hero-meta {
+  margin-top: 12px;
+  font-size: 0.84rem;
+  color: #defbe9;
+}
+
+.section {
+  margin-top: 16px;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 14px;
+}
+
+.controls {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 1.3fr 1fr 1fr;
+}
+
+.field label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 0.78rem;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.field input,
+.field select {
+  width: 100%;
+  border: 1px solid #beccbe;
+  border-radius: 11px;
+  padding: 10px;
+  font-size: 0.93rem;
+  color: var(--ink);
+  background: #fff;
+}
+
+.field input:focus,
+.field select:focus {
+  outline: 2px solid var(--amber);
+  border-color: transparent;
+}
+
+.note {
+  margin-top: 10px;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 12px;
+}
+
+.card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 12px;
+  background: #fff;
+  box-shadow: var(--shadow);
+}
+
+.card h3 {
+  margin: 0;
+  font-family: "Archivo", sans-serif;
+  font-size: 1.05rem;
+}
+
+.meta {
+  margin-top: 4px;
+  font-size: 0.84rem;
+  color: var(--muted);
+}
+
+.actions {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid #b9cbb9;
+  background: #f4f8ef;
+  color: #173328;
+  text-decoration: none;
+  padding: 6px 10px;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.btn.primary {
+  border-color: #2b8562;
+  background: #e2f5ea;
+  color: #0f5138;
+}
+
+.split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.kv {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.box {
+  border: 1px solid #d9e5d5;
+  border-radius: 10px;
+  background: #f8fcf5;
+  padding: 8px;
+}
+
+.k {
+  display: block;
+  font-size: 0.72rem;
+  color: #61756a;
+  margin-bottom: 2px;
+  font-weight: 700;
+}
+
+.v {
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.tag {
+  border-radius: 999px;
+  border: 1px solid #ccd8c7;
+  background: #f3f8ef;
+  padding: 4px 9px;
+  font-size: 0.77rem;
+  color: #30463b;
+  font-weight: 700;
+}
+
+.empty {
+  margin-top: 12px;
+  border-radius: 14px;
+  border: 1px dashed #c4d2c0;
+  background: #f8fcf5;
+  text-align: center;
+  padding: 26px;
+  color: var(--muted);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.table th,
+.table td {
+  border-bottom: 1px solid #dfe8db;
+  padding: 8px;
+  text-align: left;
+  font-size: 0.85rem;
+}
+
+.table th {
+  font-size: 0.76rem;
+  color: #5c7064;
+  font-weight: 700;
+}
+
+@media (max-width: 960px) {
+  .controls { grid-template-columns: 1fr; }
+  .split { grid-template-columns: 1fr; }
+}
