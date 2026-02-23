@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
 set -u
+# Disable history expansion to avoid `event not found` when run from interactive shells.
+set +H 2>/dev/null || true
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 INTERVAL_SECONDS="${1:-5}"

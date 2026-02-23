@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
 set -eu
+# Disable history expansion to avoid `event not found` when run from interactive shells.
+set +H 2>/dev/null || true
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 STATE_DIR="$REPO_ROOT/.autopush"
