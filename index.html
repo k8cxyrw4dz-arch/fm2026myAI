@@ -3,15 +3,41 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Basic Starter</title>
+  <title>오늘 뭐먹지</title>
   <link rel="stylesheet" href="./assets/styles.css" />
 </head>
 <body>
   <main class="container">
-    <h1>기본 페이지</h1>
-    <p>프로젝트가 기본 스크립트 상태로 초기화되었습니다.</p>
-    <button id="btn">클릭 테스트</button>
-    <p id="status"></p>
+    <header class="hero">
+      <h1>오늘 뭐먹지</h1>
+      <p>저녁 메뉴를 랜덤으로 추천해드려요.</p>
+    </header>
+
+    <section class="panel">
+      <h2>필터 선택</h2>
+      <div id="filters" class="filters" role="radiogroup" aria-label="식사 유형 필터">
+        <button class="filter-btn active" data-filter="all" aria-pressed="true">전체</button>
+        <button class="filter-btn" data-filter="solo" aria-pressed="false">혼밥</button>
+        <button class="filter-btn" data-filter="diet" aria-pressed="false">다이어트</button>
+        <button class="filter-btn" data-filter="student" aria-pressed="false">자취생</button>
+        <button class="filter-btn" data-filter="family" aria-pressed="false">가족용</button>
+      </div>
+
+      <div class="recommend-box">
+        <p class="label">추천 메뉴</p>
+        <p id="menu-result" class="menu-result">버튼을 눌러 메뉴를 추천받아보세요.</p>
+        <div class="actions">
+          <button id="recommend-btn" class="primary">랜덤 추천 받기</button>
+          <button id="save-btn" class="secondary">오늘 메뉴 저장</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>저장한 오늘 메뉴</h2>
+      <ul id="saved-list" class="saved-list"></ul>
+      <button id="clear-btn" class="secondary clear">전체 삭제</button>
+    </section>
   </main>
 
   <script type="module" src="./assets/app.js"></script>
